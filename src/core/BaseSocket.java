@@ -18,4 +18,5 @@ abstract public class BaseSocket extends Thread {
 	abstract public int getPort();	
 	abstract public String getAddress();
 	abstract public boolean isConnected();	
+	abstract public void sendMessage(String message);
 }

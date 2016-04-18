@@ -50,6 +50,15 @@ public class ChatApp {
 			System.out.println("Connection not found");
 		}
 	}
+	protected static void sendMessage(Integer idx, String message) {
+		List<BaseSocket> _connections = getConnections();
+		BaseSocket socket = _connections.get(idx);
+		if(socket != null) {
+			socket.sendMessage(message);
+		} else {
+			System.out.println("Connection not found");
+		}
+	}
 	public static void main(String args[]) {
 		connections = new ArrayList<>();
 		Scanner reader = new Scanner(System.in);
@@ -87,7 +96,7 @@ public class ChatApp {
 				System.out.println(ChatApp.server.getAddress());
 			} else if(command.compareToIgnoreCase("myport") == 0) {
 				System.out.println(ChatApp.server.getPort());
-			} else if(command.length() >= 7 && command.substring(0, 6).compareToIgnoreCase("connect") == 0) {
+			} else if(command.length() >= 7 && command.substring(0, 7).compareToIgnoreCase("connect") == 0) {
 				String[] parts = command.trim().split(" ");
 				if(parts.length == 3) {
 					String serverAddress = parts[1];
@@ -113,25 +122,26 @@ public class ChatApp {
 				if(parts.length == 2) {
 					int id;
 					try {
-						id = Integer.valueOf(parts[2]);
-					} catch(NumberFormatException e) {
-						id = 0;
-					}
-					if(id <= 0) {
-						System.out.println("Invalid Arguments: terminate <id>");
-					} else {
+						id = Integer.valueOf(parts[1]);
 						removeConnection(id);
+					} catch(NumberFormatException e) {
+						System.out.println("Invalid Id: terminate <id>");
 					}
 				} else {
 					System.out.println("Invalid Arguments: terminate <id>");
 				}
 			} else if(command.length() > 4 && command.substring(0,4).compareToIgnoreCase("send") == 0) {
-				//TODO: add ability to send message
 				String[] parts = command.trim().split(" ",3);
 				if(parts.length == 3) {
-					
+					int id;
+					try {
+						id = Integer.valueOf(parts[1]);
+						sendMessage(id,parts[2]);
+					} catch(NumberFormatException e) {
+						System.out.println("Invalid Id: send <id> <message>");
+					}
 				} else {
-					System.out.println("Invalid Arguments: send <id> <message>");
+					System.out.println("Invalid number of Arguments: send <id> <message>");
 				}
 			} else if(command.compareToIgnoreCase("exit") != 0) {
 				System.out.println("Invalid Command");

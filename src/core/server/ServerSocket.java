@@ -5,9 +5,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-
 import core.BaseSocket;
-import data.model.MessageBufferModel;
 
 public class ServerSocket extends BaseSocket {
 	private int port;
@@ -89,6 +87,11 @@ public class ServerSocket extends BaseSocket {
 	
 	@Override
 	protected void closeSocket() throws IOException {
+		//Do Nothing
+	}
+	
+	@Override
+	public void sendMessage(String message) {
 		//Do Nothing
 	}
 }

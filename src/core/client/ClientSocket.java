@@ -2,7 +2,8 @@ package core.client;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-
+import java.nio.charset.Charset;
+import java.util.Scanner;
 import core.BaseSocket;
 import data.model.MessageBufferModel;
 
@@ -19,14 +20,43 @@ public class ClientSocket extends BaseSocket {
 	
 	public void connect() throws IOException, UnknownHostException {
 		socket = new java.net.Socket(this.serverAddress,this.serverPort);
-		//TODO: setup I/O steams
 	}
 	
 	@Override
 	public void run() {
-		while(this.run) {
+		while(this.run && this.socket.isConnected()) {
+			//Read socket input
+			try {
+				Scanner reader = new Scanner(socket.getInputStream());
+				while(reader.hasNext()) {
+					System.out.println(this.serverAddress+":"+this.serverPort + " - " + reader.nextLine());
+				}
+				reader.close();
+			} catch (IOException e) {
+				//TODO: handle exception
+				//Failed to read from socket
+			}
 			
+			//Write to socket output
+			while(messageBuffer.size() > 0) {
+				try {
+					socket.getOutputStream().write(messageBuffer.pop().getBytes(Charset.forName("UTF-8")));
+				} catch (IOException e) {
+					// TODO handle exception
+					//Failed to write to socket
+				}
+			}
 		}
+	}
+	
+	@Override
+	protected void closeSocket() throws IOException {
+		this.socket.close();
+	}
+	
+	@Override
+	public boolean isConnected() {
+		return this.socket.isConnected();
 	}
 
 	@Override
@@ -37,5 +67,9 @@ public class ClientSocket extends BaseSocket {
 	@Override
 	public String getAddress() {
 		return this.serverAddress;
+	}
+	
+	public void sendMessage(String message) {
+		messageBuffer.queue(message);
 	}
 }

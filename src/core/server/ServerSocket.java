@@ -11,14 +11,12 @@ import data.model.MessageBufferModel;
 
 public class ServerSocket extends BaseSocket {
 	private int port;
-	private MessageBufferModel messageBuffer;
 	private java.net.ServerSocket socket;
 	private List<ClientSocketThread> clients;
 	
 	public ServerSocket(int port) {
 		this.port = port;
 		this.clients = new ArrayList<>();
-		this.messageBuffer = new MessageBufferModel();
 	}
 	public ServerSocket() {
 		new ServerSocket(8080);
@@ -26,6 +24,14 @@ public class ServerSocket extends BaseSocket {
 	
 	public int getPort() {
 		return this.port;
+	}
+	
+	public List<BaseSocket> getClients() {
+		List<BaseSocket> _clients = new ArrayList<>();
+		while(this.clients.iterator().hasNext()) {
+			_clients.add(clients.iterator().next());
+		}
+		return _clients;
 	}
 	
 	@SuppressWarnings("static-access")
@@ -50,7 +56,7 @@ public class ServerSocket extends BaseSocket {
 					Socket clientSocket = this.socket.accept();
 					System.out.println("A Connection Established: " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
 					try {
-						ClientSocketThread client = new ClientSocketThread(clientSocket,this.messageBuffer);
+						ClientSocketThread client = new ClientSocketThread(clientSocket);
 						client.start();
 						this.clients.add(client);
 					} catch(IOException e) {
@@ -61,11 +67,28 @@ public class ServerSocket extends BaseSocket {
 				} catch (IOException e) {
 					System.out.println("Client failed to establish a connection");
 				}
-			}
+			}			
+			this.socket.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}		
+	}
+	
+	@Override
+	public boolean isConnected() {
+		for(ClientSocketThread client : clients) {
+			if(!client.isConnected()) {
+				client.stopThread();
+				clients.remove(client);
+			}
 		}
 		
+		return this.run && this.socket != null && !this.socket.isClosed();
+	}
+	
+	@Override
+	protected void closeSocket() throws IOException {
+		//Do Nothing
 	}
 }

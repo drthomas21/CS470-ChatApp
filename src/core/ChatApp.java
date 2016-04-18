@@ -2,47 +2,63 @@ package core;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import core.client.ClientSocket;
 
 public class ChatApp {
-	private static HashMap<Integer,ClientSocket> connections;
-	private static int connNum = 0;
+	private static List<ClientSocket> connections;
 	private static core.server.ServerSocket server;
 	protected static void connectToServer(String address, int port) {
 		ClientSocket socket = new ClientSocket(address,port);
 		try {
 			socket.connect();
-			connNum++;
-			connections.put(connNum,socket);
+			connections.add(socket);
 		} catch(UnknownHostException e) {
 			System.out.println(e.getLocalizedMessage());
 		} catch(IOException e) {
 			System.out.println(e.getLocalizedMessage());
 		}		
 	}
+	protected static List<BaseSocket> getConnections() {
+		List<BaseSocket> sockets = new ArrayList<>();
+		for(BaseSocket socket : connections) {
+			sockets.add(socket);
+		}
+		for(BaseSocket socket : server.getClients()){
+			sockets.add(socket);
+		}
+		
+		return sockets;
+	}
 	protected static void listConnections() {
 		System.out.println("id: IP address\tPort No.");
-		for(Integer i : connections.keySet()) {
-			System.out.println(i + ": " + connections.get(i).getAddress() + "\t"+connections.get(i).getPort());
+		List<BaseSocket> _connections = getConnections();
+		for(int i=0;i<_connections.size();i++){
+			System.out.println(i + ": " + _connections.get(i).getAddress() + "\t"+_connections.get(i).getPort());
 		}
 	}
-	protected static void removeConnection(Integer id) {
-		if(connections.containsKey(id)) {
-			connections.get(id).stopThread();
-			connections.remove(id);
+	protected static void removeConnection(Integer idx) {
+		List<BaseSocket> _connections = getConnections();
+		BaseSocket socket = _connections.get(idx);
+		if(socket != null) {
+			socket.stopThread();
+			connections.remove(idx);
 			System.out.println("Connection terminated");
 		} else {
 			System.out.println("Connection not found");
 		}
 	}
 	public static void main(String args[]) {
-		connections = new HashMap<>();
+		connections = new ArrayList<>();
 		Scanner reader = new Scanner(System.in);
 		String command = "";
 		int port = 8080;
 		if(args.length > 0) {
+			for(int i = 0; i < args.length; i++){
+				System.out.println("["+i+"]: " + args[i]);
+			}
 			//port = Integer.valueOf(args[0]);
 		}
 		ChatApp.server = new core.server.ServerSocket(port);
@@ -55,6 +71,14 @@ public class ChatApp {
 		}
 		
 		while(command.compareToIgnoreCase("exit") != 0) {
+			//Check connections
+			for(ClientSocket socket : connections) {
+				if(!socket.isConnected()) {
+					connections.remove(socket);
+				}
+			}
+			server.isConnected();
+			
 			System.out.print("Command: ");
 			command = reader.nextLine();
 			if(command.compareToIgnoreCase("help") == 0) {
@@ -103,6 +127,12 @@ public class ChatApp {
 				}
 			} else if(command.length() > 4 && command.substring(0,4).compareToIgnoreCase("send") == 0) {
 				//TODO: add ability to send message
+				String[] parts = command.trim().split(" ",3);
+				if(parts.length == 3) {
+					
+				} else {
+					System.out.println("Invalid Arguments: send <id> <message>");
+				}
 			} else if(command.compareToIgnoreCase("exit") != 0) {
 				System.out.println("Invalid Command");
 			}

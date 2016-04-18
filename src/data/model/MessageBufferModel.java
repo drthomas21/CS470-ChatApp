@@ -1,36 +1,24 @@
 package data.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 public class MessageBufferModel {
-	private HashMap<String,ArrayList<String>> messages;
+	private List<String> messages;
 	
 	public MessageBufferModel() {
-		this.messages = new HashMap<String,ArrayList<String>>();
+		this.messages = new ArrayList<>();
 	}
 	
-	public void queue(String to, String message) {
-		if(!this.messages.containsKey(to)) {
-			this.messages.put(to, new ArrayList<String>());
-		}
-		
-		//TODO: add lock
-		ArrayList<String> buffer = this.messages.get(to);
-		buffer.add(message);
-		this.messages.put(to, buffer);
-		//TODO: remove lock
+	public void queue(String message) {
+		this.messages.add(message);
 	}
 	
-	public String pop(String to) {
-		String item = null;
-		if(!this.messages.containsKey(to)) {
-			//TODO: add lock
-			ArrayList<String> buffer = this.messages.get(to);
-			item = buffer.remove(0);
-			this.messages.put(to, buffer);
-			//TODO: remove lock
-		}
-		return item;
+	public String pop() {
+		return this.messages.remove(0);
+	}
+	
+	public int size() {
+		return this.messages.size();
 	}
 }

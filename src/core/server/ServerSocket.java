@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
 import core.BaseSocket;
 
 public class ServerSocket extends BaseSocket {
@@ -26,8 +28,9 @@ public class ServerSocket extends BaseSocket {
 	
 	public List<BaseSocket> getClients() {
 		List<BaseSocket> _clients = new ArrayList<>();
-		while(this.clients.iterator().hasNext()) {
-			_clients.add(clients.iterator().next());
+		Iterator<ClientSocketThread> itr = this.clients.iterator();
+		while(itr.hasNext()) {
+			_clients.add(itr.next());
 		}
 		return _clients;
 	}

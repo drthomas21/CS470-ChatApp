@@ -9,7 +9,6 @@ import data.model.MessageBufferModel;
 
 public class ClientSocketThread extends BaseSocket {
 	private Socket socket;
-	private boolean isConnected = true;
 	private String clientAddress;
 	private int clientPort;
 	private MessageBufferModel messageBuffer;
@@ -21,7 +20,7 @@ public class ClientSocketThread extends BaseSocket {
 	}
 
 	public void run() {
-		while(isConnected && this.socket.isConnected()) {
+		while(this.run && this.socket.isConnected()) {
 			//Read socket input
 			try {
 				Scanner reader = new Scanner(socket.getInputStream());
@@ -42,6 +41,13 @@ public class ClientSocketThread extends BaseSocket {
 					// TODO handle exception
 					//Failed to write to socket
 				}
+			}
+			
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

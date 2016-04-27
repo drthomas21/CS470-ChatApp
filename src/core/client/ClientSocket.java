@@ -1,8 +1,8 @@
 package core.client;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.util.Scanner;
 
 import core.BaseSocket;
@@ -14,6 +14,7 @@ public class ClientSocket extends BaseSocket {
 	private java.net.Socket socket;
 	private MessageBufferModel messageBuffer;
 	private Scanner reader;
+	private PrintWriter writer;
 	public ClientSocket(String address, int port) {
 		this.serverAddress = address;
 		this.serverPort = port;
@@ -23,6 +24,7 @@ public class ClientSocket extends BaseSocket {
 	public void connect() throws IOException, UnknownHostException {
 		socket = new java.net.Socket(this.serverAddress,this.serverPort);
 		reader = new Scanner(socket.getInputStream());
+		writer = new PrintWriter(socket.getOutputStream(), true);
 	}
 
 	@Override
@@ -41,18 +43,11 @@ public class ClientSocket extends BaseSocket {
 
 			//Write to socket output
 			while(messageBuffer.size() > 0) {
-				try {
-					String message = messageBuffer.pop();
-					socket.getOutputStream().write(message.getBytes(Charset.forName("UTF-8")));
-				} catch (IOException e) {
-					System.out.println(e.getMessage());
-					e.printStackTrace();
-				}
+				writer.println(messageBuffer.pop());
 			}
 		}
 		try {
 			this.socket.close();
-			reader.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,8 +1,8 @@
 package core.server;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import java.util.Scanner;
 import core.BaseSocket;
 import data.model.MessageBufferModel;
@@ -13,12 +13,14 @@ public class ClientSocketThread extends BaseSocket {
 	private int clientPort;
 	private MessageBufferModel messageBuffer;
 	private Scanner reader;
+	private PrintWriter writer;
 	public ClientSocketThread(Socket clientSocket) throws IOException {
 		this.socket = clientSocket;
 		this.clientAddress = clientSocket.getInetAddress().getHostAddress();
 		this.clientPort = clientSocket.getPort();
 		this.messageBuffer = new MessageBufferModel();
 		this.reader = new Scanner(socket.getInputStream());
+		this.writer = new PrintWriter(socket.getOutputStream(), true);
 	}
 
 	public void run() {
@@ -35,13 +37,7 @@ public class ClientSocketThread extends BaseSocket {
 			
 			//Write to socket output
 			while(messageBuffer.size() > 0) {
-				try {
-					String message = messageBuffer.pop();
-					socket.getOutputStream().write(message.getBytes(Charset.forName("UTF-8")));
-				} catch (IOException e) {
-					System.out.println(e.getMessage());
-					e.printStackTrace();
-				}
+				writer.println(messageBuffer.pop());
 			}
 		}
 		try {

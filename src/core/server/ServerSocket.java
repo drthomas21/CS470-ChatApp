@@ -55,7 +55,6 @@ public class ServerSocket extends BaseSocket {
 				try {
 					// A client socket will represent a connection between the client and this server
 					Socket clientSocket = this.socket.accept();
-					System.out.println("A Connection Established: " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
 					try {
 						ClientSocketThread client = new ClientSocketThread(clientSocket);
 						client.start();

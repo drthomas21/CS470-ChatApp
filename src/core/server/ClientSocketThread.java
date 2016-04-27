@@ -42,7 +42,6 @@ public class ClientSocketThread extends BaseSocket {
 		}
 		try {
 			this.socket.close();
-			reader.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

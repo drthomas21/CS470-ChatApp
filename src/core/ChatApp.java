@@ -120,7 +120,7 @@ public class ChatApp {
 				
 			} else if(command.compareToIgnoreCase("list") == 0) {
 				ChatApp.listConnections();
-			} else if(command.length() >= 8 && command.substring(0,8).compareToIgnoreCase("terminate") == 0) {
+			} else if(command.length() >= 8 && command.substring(0,9).compareToIgnoreCase("terminate") == 0) {
 				String[] parts = command.trim().split(" ");
 				if(parts.length == 2) {
 					int id;

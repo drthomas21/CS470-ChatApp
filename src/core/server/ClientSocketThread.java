@@ -12,34 +12,35 @@ public class ClientSocketThread extends BaseSocket {
 	private String clientAddress;
 	private int clientPort;
 	private MessageBufferModel messageBuffer;
+	private Scanner reader;
 	public ClientSocketThread(Socket clientSocket) throws IOException {
 		this.socket = clientSocket;
 		this.clientAddress = clientSocket.getInetAddress().getHostAddress();
 		this.clientPort = clientSocket.getPort();
 		this.messageBuffer = new MessageBufferModel();
+		this.reader = new Scanner(socket.getInputStream());
 	}
 
 	public void run() {
 		while(this.run && this.socket.isConnected()) {
 			//Read socket input
 			try {
-				Scanner reader = new Scanner(socket.getInputStream());
-				while(reader.hasNext()) {
-					System.out.println(this.clientAddress+":"+this.clientPort + " - " + reader.nextLine());
+				while(socket.getInputStream().available() > 0 && reader.hasNext()) {
+					System.out.println("Message received from " + this.clientAddress+System.lineSeparator()+"Sender's Port: "+this.clientPort + System.lineSeparator()+"Message: \"" + reader.nextLine() + "\"");
 				}
-				reader.close();
 			} catch (IOException e) {
-				//TODO: handle exception
-				//Failed to read from socket
+				System.out.println(e.getMessage());
+				e.printStackTrace();
 			}
 			
 			//Write to socket output
 			while(messageBuffer.size() > 0) {
 				try {
-					socket.getOutputStream().write(messageBuffer.pop().getBytes(Charset.forName("UTF-8")));
+					String message = messageBuffer.pop();
+					socket.getOutputStream().write(message.getBytes(Charset.forName("UTF-8")));
 				} catch (IOException e) {
-					// TODO handle exception
-					//Failed to write to socket
+					System.out.println(e.getMessage());
+					e.printStackTrace();
 				}
 			}
 			
@@ -50,6 +51,8 @@ public class ClientSocketThread extends BaseSocket {
 				e.printStackTrace();
 			}
 		}
+		
+		reader.close();
 	}
 	
 	@Override

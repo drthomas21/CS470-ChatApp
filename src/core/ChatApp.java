@@ -14,6 +14,7 @@ public class ChatApp {
 		ClientSocket socket = new ClientSocket(address,port);
 		try {
 			socket.connect();
+			socket.start();
 			connections.add(socket);
 		} catch(UnknownHostException e) {
 			System.out.println(e.getLocalizedMessage());
@@ -41,8 +42,9 @@ public class ChatApp {
 	}
 	protected static void removeConnection(Integer idx) {
 		List<BaseSocket> _connections = getConnections();
-		BaseSocket socket = _connections.get(idx);
-		if(socket != null) {
+		
+		if(idx < _connections.size()) {
+			BaseSocket socket = _connections.get(idx);
 			socket.stopThread();
 			connections.remove(idx);
 			System.out.println("Connection terminated");
@@ -52,8 +54,9 @@ public class ChatApp {
 	}
 	protected static void sendMessage(Integer idx, String message) {
 		List<BaseSocket> _connections = getConnections();
-		BaseSocket socket = _connections.get(idx);
-		if(socket != null) {
+		
+		if(idx < _connections.size()) {
+			BaseSocket socket = _connections.get(idx);
 			socket.sendMessage(message);
 		} else {
 			System.out.println("Connection not found");

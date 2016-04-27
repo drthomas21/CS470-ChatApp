@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Scanner;
+
 import core.BaseSocket;
 import data.model.MessageBufferModel;
 
@@ -12,55 +13,59 @@ public class ClientSocket extends BaseSocket {
 	private int serverPort;
 	private java.net.Socket socket;
 	private MessageBufferModel messageBuffer;
+	private Scanner reader;
 	public ClientSocket(String address, int port) {
 		this.serverAddress = address;
 		this.serverPort = port;
 		this.messageBuffer = new MessageBufferModel();
 	}
-	
+
 	public void connect() throws IOException, UnknownHostException {
 		socket = new java.net.Socket(this.serverAddress,this.serverPort);
+		reader = new Scanner(socket.getInputStream());
 	}
-	
+
 	@Override
 	public void run() {
 		while(this.run && this.socket.isConnected()) {
 			//Read socket input
 			try {
-				Scanner reader = new Scanner(socket.getInputStream());
-				while(reader.hasNext()) {
-					System.out.println(this.serverAddress+":"+this.serverPort + " - " + reader.nextLine());
+				while(socket.getInputStream().available() > 0 && reader.hasNext()) {
+					System.out.println("Message received from " + this.serverAddress+System.lineSeparator()+"Sender's Port: "+this.serverPort + System.lineSeparator()+"Message: \"" + reader.nextLine() + "\"");
 				}
-				reader.close();
+				//reader.close();
 			} catch (IOException e) {
-				//TODO: handle exception
-				//Failed to read from socket
+				System.out.println(e.getMessage());
+				e.printStackTrace();
 			}
-			
+
 			//Write to socket output
 			while(messageBuffer.size() > 0) {
 				try {
-					socket.getOutputStream().write(messageBuffer.pop().getBytes(Charset.forName("UTF-8")));
+					String message = messageBuffer.pop();
+					socket.getOutputStream().write(message.getBytes(Charset.forName("UTF-8")));
+					System.out.println("Sending message [" + message +"] to " + this.getAddress()+":"+this.getPort());
 				} catch (IOException e) {
-					// TODO handle exception
-					//Failed to write to socket
+					System.out.println(e.getMessage());
+					e.printStackTrace();
 				}
 			}
-			
+
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				System.out.println(e.getMessage());
 				e.printStackTrace();
 			}
 		}
+		reader.close();
 	}
-	
+
 	@Override
 	protected void closeSocket() throws IOException {
 		this.socket.close();
 	}
-	
+
 	@Override
 	public boolean isConnected() {
 		return this.socket.isConnected();
@@ -75,7 +80,7 @@ public class ClientSocket extends BaseSocket {
 	public String getAddress() {
 		return this.serverAddress;
 	}
-	
+
 	public void sendMessage(String message) {
 		messageBuffer.queue(message);
 	}

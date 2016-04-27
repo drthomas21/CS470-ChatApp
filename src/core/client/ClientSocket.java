@@ -44,21 +44,19 @@ public class ClientSocket extends BaseSocket {
 				try {
 					String message = messageBuffer.pop();
 					socket.getOutputStream().write(message.getBytes(Charset.forName("UTF-8")));
-					System.out.println("Sending message [" + message +"] to " + this.getAddress()+":"+this.getPort());
 				} catch (IOException e) {
 					System.out.println(e.getMessage());
 					e.printStackTrace();
 				}
 			}
-
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-			}
 		}
-		reader.close();
+		try {
+			this.socket.close();
+			reader.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 
 	@Override

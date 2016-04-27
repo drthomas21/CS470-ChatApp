@@ -43,16 +43,14 @@ public class ClientSocketThread extends BaseSocket {
 					e.printStackTrace();
 				}
 			}
-			
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
-		
-		reader.close();
+		try {
+			this.socket.close();
+			reader.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override

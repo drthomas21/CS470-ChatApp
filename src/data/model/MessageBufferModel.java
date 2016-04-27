@@ -11,7 +11,6 @@ public class MessageBufferModel {
 	}
 	
 	public void queue(String message) {
-		System.out.println("Queuing message");
 		this.messages.add(message);
 	}
 	

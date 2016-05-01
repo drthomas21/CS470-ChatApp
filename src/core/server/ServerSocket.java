@@ -11,12 +11,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import core.BaseSocket;
+import core.client.ClientSocket;
 
 public class ServerSocket extends BaseSocket {
 	private int port;
 	private InetAddress iNetAddress;
 	private java.net.ServerSocket socket;
-	private List<ClientSocketThread> clients;
+	private List<ClientSocket> clients;
 	
 	public ServerSocket(int port) {
 		this.port = port;
@@ -33,7 +34,7 @@ public class ServerSocket extends BaseSocket {
 	
 	public List<BaseSocket> getClients() {
 		List<BaseSocket> _clients = new ArrayList<>();
-		Iterator<ClientSocketThread> itr = this.clients.iterator();
+		Iterator<ClientSocket> itr = this.clients.iterator();
 		while(itr.hasNext()) {
 			_clients.add(itr.next());
 		}
@@ -88,7 +89,7 @@ public class ServerSocket extends BaseSocket {
 					// A client socket will represent a connection between the client and this server
 					Socket clientSocket = this.socket.accept();
 					try {
-						ClientSocketThread client = new ClientSocketThread(clientSocket);
+						ClientSocket client = new ClientSocket(clientSocket);
 						client.start();
 						this.clients.add(client);
 					} catch(IOException e) {
@@ -110,7 +111,7 @@ public class ServerSocket extends BaseSocket {
 	
 	@Override
 	public boolean isConnected() {
-		for(ClientSocketThread client : clients) {
+		for(ClientSocket client : clients) {
 			if(!client.isConnected()) {
 				client.stopThread();
 				clients.remove(client);
@@ -129,6 +130,7 @@ public class ServerSocket extends BaseSocket {
 	public void sendMessage(String message) {
 		//Do Nothing
 	}
+	
 	public void setNetworkInterface(String name, String ipAddress) throws SocketException {
 		NetworkInterface nic = NetworkInterface.getByName(name);
 		if(nic != null) {

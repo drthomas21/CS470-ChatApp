@@ -1,6 +1,7 @@
 package core.client;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
@@ -8,37 +9,53 @@ import core.BaseSocket;
 import data.model.MessageBufferModel;
 
 public class ClientSocket extends BaseSocket {
-	private String serverAddress;
-	private int serverPort;
+	private String hostAddress;
+	private int hostPort;
 	private java.net.Socket socket;
 	private MessageBufferModel messageBuffer;
 	private Scanner reader;
+	private long timestamp;
+	
 	public ClientSocket(String address, int port) {
-		this.serverAddress = address;
-		this.serverPort = port;
+		this.hostAddress = address;
+		this.hostPort = port;
 		this.messageBuffer = new MessageBufferModel();
+	}
+	
+	public ClientSocket(Socket clientSocket) throws IOException {
+		this.socket = clientSocket;
+		this.socket.setSoTimeout(1000);
+		this.hostAddress = clientSocket.getInetAddress().getHostAddress();
+		this.hostPort = clientSocket.getPort();
+		this.messageBuffer = new MessageBufferModel();
+		this.reader = new Scanner(socket.getInputStream());
 	}
 
 	public void connect() throws IOException, UnknownHostException {
-		socket = new java.net.Socket(this.serverAddress,this.serverPort);
+		socket = new java.net.Socket(this.hostAddress,this.hostPort);
 		socket.setSoTimeout(1000);
 		reader = new Scanner(socket.getInputStream());
 	}
 
 	@Override
 	public void run() {
-		while(this.run && this.socket.isConnected()) {
+		timestamp = System.currentTimeMillis();
+		while(this.run && this.socket.isConnected() && System.currentTimeMillis() - timestamp < 1000) {
 			//Read socket input
 			try {
 				while(socket.getInputStream().available() > 0 && reader.hasNext()) {
-					System.out.println("Message received from " + this.serverAddress+System.lineSeparator()+"Sender's Port: "+this.serverPort + System.lineSeparator()+"Message: \"" + reader.nextLine() + "\"");
+					timestamp = System.currentTimeMillis();
+					String message = reader.nextLine();
+					if(message != "\0") {
+						System.out.println("Message received from " + this.hostAddress+System.lineSeparator()+"Sender's Port: "+this.hostPort + System.lineSeparator()+"Message: \"" + message + "\"");
+					}
 				}
 				//reader.close();
 			} catch (IOException e) {
 				if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0) {
 					e.printStackTrace();
 				}				
-			}
+			}			
 
 			//Write to socket output
 			while(messageBuffer.size() > 0) {
@@ -51,7 +68,21 @@ public class ClientSocket extends BaseSocket {
 					}
 				}
 			}
+			
+			//Send heartbeat
+			try {
+				this.socket.getOutputStream().write("\0".getBytes());
+				this.socket.getOutputStream().flush();
+			} catch (IOException e) {
+				if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0) {
+					e.printStackTrace();
+				}
+			}
+			
 		}
+		
+		this.run = false;
+		
 		try {
 			this.socket.close();
 		} catch (IOException e) {
@@ -76,12 +107,12 @@ public class ClientSocket extends BaseSocket {
 
 	@Override
 	public int getPort() {
-		return this.serverPort;
+		return this.hostPort;
 	}
 
 	@Override
 	public String getAddress() {
-		return this.serverAddress;
+		return this.hostAddress;
 	}
 
 	public void sendMessage(String message) {

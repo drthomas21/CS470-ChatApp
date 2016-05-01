@@ -66,21 +66,21 @@ public class ChatApp {
 	public static void main(String args[]) {
 		connections = new ArrayList<>();
 		Scanner reader = new Scanner(System.in);
-		String command = "";
+		String command = "", nic = "",ipaddress = "";
 		int port = 8080;
-		String nic = "";
 		
 		if(args.length > 0) {
 			port = Integer.valueOf(args[0]);
 		}
-		if(args.length > 1) {
+		if(args.length > 2) {
 			nic = args[1];
+			ipaddress = args[2];
 		}
 		
 		ChatApp.server = new core.server.ServerSocket(port);
 		if(!nic.isEmpty()) {
 			try {
-				ChatApp.server.setNetworkInterface(nic);
+				ChatApp.server.setNetworkInterface(nic,ipaddress);
 			} catch (SocketException e1) {
 				System.out.println("Network Interface ["+nic+"] does not exists");
 			}

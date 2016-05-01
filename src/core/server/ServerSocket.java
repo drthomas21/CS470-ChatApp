@@ -129,14 +129,14 @@ public class ServerSocket extends BaseSocket {
 	public void sendMessage(String message) {
 		//Do Nothing
 	}
-	public void setNetworkInterface(String name) throws SocketException {
+	public void setNetworkInterface(String name, String ipAddress) throws SocketException {
 		NetworkInterface nic = NetworkInterface.getByName(name);
 		if(nic != null) {
 			Enumeration<InetAddress> addresses = nic.getInetAddresses();
 			while(addresses.hasMoreElements()) {
 				iNetAddress = addresses.nextElement();
 				String address = iNetAddress.getHostAddress();
-				if(address.matches("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}")){
+				if(address.compareTo(ipAddress) == 0){
 					System.out.println("Using Network Interface: " + nic.getName());
 					break;
 				}

@@ -1,7 +1,6 @@
 package core.client;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
@@ -14,7 +13,6 @@ public class ClientSocket extends BaseSocket {
 	private java.net.Socket socket;
 	private MessageBufferModel messageBuffer;
 	private Scanner reader;
-	private PrintWriter writer;
 	public ClientSocket(String address, int port) {
 		this.serverAddress = address;
 		this.serverPort = port;
@@ -23,8 +21,8 @@ public class ClientSocket extends BaseSocket {
 
 	public void connect() throws IOException, UnknownHostException {
 		socket = new java.net.Socket(this.serverAddress,this.serverPort);
+		socket.setSoTimeout(1000);
 		reader = new Scanner(socket.getInputStream());
-		writer = new PrintWriter(socket.getOutputStream(), true);
 	}
 
 	@Override
@@ -37,13 +35,21 @@ public class ClientSocket extends BaseSocket {
 				}
 				//reader.close();
 			} catch (IOException e) {
-				System.out.println(e.getMessage());
-				e.printStackTrace();
+				if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0) {
+					e.printStackTrace();
+				}				
 			}
 
 			//Write to socket output
 			while(messageBuffer.size() > 0) {
-				writer.println(messageBuffer.pop());
+				try {
+					this.socket.getOutputStream().write(messageBuffer.pop().getBytes());
+					this.socket.getOutputStream().flush();
+				} catch (IOException e) {
+					if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 		try {
@@ -62,7 +68,7 @@ public class ClientSocket extends BaseSocket {
 	@Override
 	public boolean isConnected() {
 		try {
-			return this.socket.isConnected() || !this.socket.getInetAddress().isReachable(300);
+			return this.socket.isConnected() || this.socket.getInetAddress().isReachable(300);
 		} catch (IOException e) {
 			return false;
 		}

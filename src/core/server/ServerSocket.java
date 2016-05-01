@@ -14,15 +14,17 @@ import core.BaseSocket;
 
 public class ServerSocket extends BaseSocket {
 	private int port;
+	private InetAddress iNetAddress;
 	private java.net.ServerSocket socket;
 	private List<ClientSocketThread> clients;
 	
 	public ServerSocket(int port) {
 		this.port = port;
 		this.clients = new ArrayList<>();
+		this.iNetAddress = null;
 	}
 	public ServerSocket() {
-		new ServerSocket(8080);
+		this(8080);
 	}
 	
 	public int getPort() {
@@ -43,8 +45,11 @@ public class ServerSocket extends BaseSocket {
 	}
 	
 	private InetAddress getInetAddress() throws SocketException {
+		if(iNetAddress != null) {
+			return iNetAddress;
+		}
+		
 		NetworkInterface ni = null;
-		InetAddress iNetAddress = null;
 		Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces();
 		while(nics.hasMoreElements()) {
 			ni = nics.nextElement();
@@ -54,6 +59,7 @@ public class ServerSocket extends BaseSocket {
 					iNetAddress = addresses.nextElement();
 					String address = iNetAddress.getHostAddress();
 					if(address.matches("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}") && address.compareTo("127.0.0.1") != 0 && address.compareTo("0.0.0.0") != 0){
+						System.out.println("Using Network Interface: " + ni.getName());
 						break;
 					}
 					
@@ -72,6 +78,7 @@ public class ServerSocket extends BaseSocket {
 			if(iNetAddress == null) {
 				throw new IOException("No external network interface card detected");
 			}
+			
 			this.socket = new java.net.ServerSocket(this.port, 0,iNetAddress);
 			System.out.println("Server has started on port: " + this.socket.getLocalPort());
 			System.out.println("Waiting for clients...");
@@ -121,5 +128,16 @@ public class ServerSocket extends BaseSocket {
 	@Override
 	public void sendMessage(String message) {
 		//Do Nothing
+	}
+	public void setNetworkInterface(String name) throws SocketException {
+		NetworkInterface nic = NetworkInterface.getByName(name);
+		if(nic != null) {
+			if(nic.getInetAddresses().hasMoreElements()) {
+				this.iNetAddress = nic.getInetAddresses().nextElement();
+				System.out.println("Using Network Interface: " + nic.getName());
+			}
+		} else {
+			throw new SocketException("Network Interface ["+name+"] does not exists");
+		}
 	}
 }

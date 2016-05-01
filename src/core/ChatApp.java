@@ -1,6 +1,7 @@
 package core;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,11 +68,25 @@ public class ChatApp {
 		Scanner reader = new Scanner(System.in);
 		String command = "";
 		int port = 8080;
+		String nic = "";
+		
 		if(args.length > 0) {
 			port = Integer.valueOf(args[0]);
 		}
+		if(args.length > 1) {
+			nic = args[1];
+		}
+		
 		ChatApp.server = new core.server.ServerSocket(port);
+		if(!nic.isEmpty()) {
+			try {
+				ChatApp.server.setNetworkInterface(nic);
+			} catch (SocketException e1) {
+				System.out.println("Network Interface ["+nic+"] does not exists");
+			}
+		}
 		ChatApp.server.start();
+		
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {

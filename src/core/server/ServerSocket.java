@@ -111,8 +111,10 @@ public class ServerSocket extends BaseSocket {
 	
 	@Override
 	public boolean isConnected() {
-		for(ClientSocket client : clients) {
-			if(!client.isConnected()) {
+		Iterator<ClientSocket> _itr1 = clients.iterator();
+		while(_itr1.hasNext()) {
+			BaseSocket client = _itr1.next();
+			if(client != null && client.isConnected()) {
 				client.stopThread();
 				clients.remove(client);
 			}

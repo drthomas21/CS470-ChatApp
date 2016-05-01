@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import core.client.ClientSocket;
@@ -24,31 +24,28 @@ public class ChatApp {
 			System.out.println(e.getLocalizedMessage());
 		}		
 	}
+	
 	protected static List<BaseSocket> getConnections() {
 		server.isConnected();
 		List<BaseSocket> sockets = new ArrayList<>();
-		try {
-			for(BaseSocket socket : connections) {
-				if(socket.isConnected()) {
-					sockets.add(socket);
-				} else {
-					socket.stopThread();
-					connections.remove(socket);
-				}
+		Iterator<ClientSocket> _itr1 = connections.iterator();
+		while(_itr1.hasNext()) {
+			BaseSocket socket = _itr1.next();
+			if(socket != null && socket.isConnected()) {
+				sockets.add(socket);
 			}
-			for(BaseSocket socket : server.getClients()){
-				if(socket.isConnected()) {
-					sockets.add(socket);
-				}
-				
-			}
-		} catch (ConcurrentModificationException e) {
-			return getConnections();
 		}
-		
+		Iterator<BaseSocket> _itr2 = server.getClients().iterator();
+		while(_itr2.hasNext()) {
+			BaseSocket socket = _itr2.next();
+			if(socket != null && socket.isConnected()) {
+				sockets.add(socket);
+			}
+		}		
 		
 		return sockets;
 	}
+	
 	protected static void listConnections() {
 		System.out.println("id: IP address\tPort No.");
 		List<BaseSocket> _connections = getConnections();
@@ -56,6 +53,7 @@ public class ChatApp {
 			System.out.println(i + ": " + _connections.get(i).getAddress() + "\t"+_connections.get(i).getPort());
 		}
 	}
+	
 	protected static void removeConnection(Integer idx) {
 		List<BaseSocket> _connections = getConnections();
 		
@@ -67,6 +65,7 @@ public class ChatApp {
 			System.out.println("Connection not found");
 		}
 	}
+	
 	protected static void sendMessage(Integer idx, String message) {
 		List<BaseSocket> _connections = getConnections();
 		
@@ -77,6 +76,7 @@ public class ChatApp {
 			System.out.println("Connection not found");
 		}
 	}
+	
 	public static void main(String args[]) {
 		connections = new ArrayList<>();
 		Scanner reader = new Scanner(System.in);
@@ -177,10 +177,13 @@ public class ChatApp {
 				System.out.println("Invalid Command");
 			}
 		}
+		
 		System.out.println("Shutting down");
+		
 		for(BaseSocket socket : getConnections()) {
 			socket.stopThread();
 		}
+		
 		ChatApp.server.stopThread();
 		reader.close();
 	}

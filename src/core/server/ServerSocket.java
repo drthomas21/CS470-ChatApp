@@ -132,9 +132,16 @@ public class ServerSocket extends BaseSocket {
 	public void setNetworkInterface(String name) throws SocketException {
 		NetworkInterface nic = NetworkInterface.getByName(name);
 		if(nic != null) {
-			if(nic.getInetAddresses().hasMoreElements()) {
-				this.iNetAddress = nic.getInetAddresses().nextElement();
-				System.out.println("Using Network Interface: " + nic.getName());
+			Enumeration<InetAddress> addresses = nic.getInetAddresses();
+			while(addresses.hasMoreElements()) {
+				iNetAddress = addresses.nextElement();
+				String address = iNetAddress.getHostAddress();
+				if(address.matches("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}")){
+					System.out.println("Using Network Interface: " + nic.getName());
+					break;
+				}
+				
+				iNetAddress = null;
 			}
 		} else {
 			throw new SocketException("Network Interface ["+name+"] does not exists");

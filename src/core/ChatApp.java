@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Scanner;
 import core.client.ClientSocket;
@@ -26,19 +27,25 @@ public class ChatApp {
 	protected static List<BaseSocket> getConnections() {
 		server.isConnected();
 		List<BaseSocket> sockets = new ArrayList<>();
-		for(BaseSocket socket : connections) {
-			if(socket.isConnected()) {
-				sockets.add(socket);
-			} else {
-				connections.remove(socket);
+		try {
+			for(BaseSocket socket : connections) {
+				if(socket.isConnected()) {
+					sockets.add(socket);
+				} else {
+					socket.stopThread();
+					connections.remove(socket);
+				}
 			}
-		}
-		for(BaseSocket socket : server.getClients()){
-			if(socket.isConnected()) {
-				sockets.add(socket);
+			for(BaseSocket socket : server.getClients()){
+				if(socket.isConnected()) {
+					sockets.add(socket);
+				}
+				
 			}
-			
+		} catch (ConcurrentModificationException e) {
+			return getConnections();
 		}
+		
 		
 		return sockets;
 	}
@@ -55,7 +62,6 @@ public class ChatApp {
 		if(idx < _connections.size()) {
 			BaseSocket socket = _connections.get(idx);
 			socket.stopThread();
-			connections.remove(idx);
 			System.out.println("Connection terminated");
 		} else {
 			System.out.println("Connection not found");
@@ -102,15 +108,7 @@ public class ChatApp {
 			e.printStackTrace();
 		}
 		
-		while(command.compareToIgnoreCase("exit") != 0) {
-			//Check connections
-			for(ClientSocket socket : connections) {
-				if(!socket.isConnected()) {
-					connections.remove(socket);
-				}
-			}
-			server.isConnected();
-			
+		while(command.compareToIgnoreCase("exit") != 0) {			
 			System.out.print("Command: ");
 			command = reader.nextLine();
 			if(command.compareToIgnoreCase("help") == 0) {

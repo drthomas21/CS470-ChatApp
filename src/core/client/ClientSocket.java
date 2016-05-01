@@ -40,7 +40,7 @@ public class ClientSocket extends BaseSocket {
 	@Override
 	public void run() {
 		timestamp = System.currentTimeMillis();
-		while(this.run && this.socket.isConnected() && System.currentTimeMillis() - timestamp < 1000) {
+		while(this.run && !this.socket.isClosed() && System.currentTimeMillis() - timestamp < 1000) {
 			//Read socket input
 			try {
 				while(socket.getInputStream().available() > 0 && reader.hasNext()) {
@@ -52,13 +52,7 @@ public class ClientSocket extends BaseSocket {
 				}
 				//reader.close();
 			} catch (IOException e) {
-				if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0) {
-					e.printStackTrace();
-				} else {
-					System.out.println("Socket closed");
-				}
-
-				this.stopThread();
+				System.out.println("Socket closed");
 				break;
 			}			
 
@@ -69,29 +63,17 @@ public class ClientSocket extends BaseSocket {
 						this.socket.getOutputStream().write((messageBuffer.pop()+System.lineSeparator()).getBytes());
 						this.socket.getOutputStream().flush();
 					} catch (IOException e) {
-						if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0 && e.getLocalizedMessage().compareToIgnoreCase("Connection reset") != 0) {
-							e.printStackTrace();
-						} else {
-							System.out.println("Socket closed");
-						}
-						
-						this.stopThread();
+						System.out.println("Socket closed");
 						break;
 					}
 				}
 			} else {
-				//Send heartbeat
+				//Send heart beat
 				try {
 					this.socket.getOutputStream().write(("1"+System.lineSeparator()).getBytes());
 					this.socket.getOutputStream().flush();
 				} catch (IOException e) {
-					if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0 && e.getLocalizedMessage().compareToIgnoreCase("Connection reset") != 0) {
-						e.printStackTrace();
-					} else {
-						System.out.println("Socket closed");
-					}
-					
-					this.stopThread();
+					System.out.println("Socket closed");
 					break;
 				}
 			}
@@ -121,7 +103,7 @@ public class ClientSocket extends BaseSocket {
 
 	@Override
 	public boolean isConnected() {
-		return this.socket.isConnected();
+		return !this.socket.isClosed();
 	}
 
 	@Override

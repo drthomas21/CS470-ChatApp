@@ -46,7 +46,7 @@ public class ClientSocket extends BaseSocket {
 				while(socket.getInputStream().available() > 0 && reader.hasNext()) {
 					timestamp = System.currentTimeMillis();
 					String message = reader.nextLine();
-					if(message != "\0") {
+					if(message.compareTo("0") != 0) {
 						System.out.println("Message received from " + this.hostAddress+System.lineSeparator()+"Sender's Port: "+this.hostPort + System.lineSeparator()+"Message: \"" + message + "\"");
 					}
 				}
@@ -71,7 +71,7 @@ public class ClientSocket extends BaseSocket {
 			
 			//Send heartbeat
 			try {
-				this.socket.getOutputStream().write("\0".getBytes());
+				this.socket.getOutputStream().write("0".getBytes());
 				this.socket.getOutputStream().flush();
 			} catch (IOException e) {
 				if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0) {
@@ -79,6 +79,12 @@ public class ClientSocket extends BaseSocket {
 				}
 			}
 			
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
 		}
 		
 		this.run = false;

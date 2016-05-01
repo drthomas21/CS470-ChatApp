@@ -1,9 +1,12 @@
 package core.server;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,19 +38,41 @@ public class ServerSocket extends BaseSocket {
 		return _clients;
 	}
 	
-	@SuppressWarnings("static-access")
 	public String getAddress() {
-		try {
-			return this.socket.getInetAddress().getLocalHost().getHostAddress();
-		} catch (UnknownHostException e) {
-			return "0.0.0.0";
+		return this.socket.getInetAddress().getHostAddress();
+	}
+	
+	private InetAddress getInetAddress() throws SocketException {
+		NetworkInterface ni = null;
+		InetAddress iNetAddress = null;
+		Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces();
+		while(nics.hasMoreElements()) {
+			ni = nics.nextElement();
+			if(iNetAddress == null) {
+				Enumeration<InetAddress> addresses = ni.getInetAddresses();
+				while(addresses.hasMoreElements()) {
+					iNetAddress = addresses.nextElement();
+					String address = iNetAddress.getHostAddress();
+					if(address.matches("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}") && address.compareTo("127.0.0.1") != 0 && address.compareTo("0.0.0.0") != 0){
+						break;
+					}
+					
+					iNetAddress = null;
+				}
+			}				
 		}
+		
+		return iNetAddress;
 	}
 	
 	@Override
 	public void run() {
 		try {
-			this.socket = new java.net.ServerSocket(this.port);
+			InetAddress iNetAddress = this.getInetAddress();
+			if(iNetAddress == null) {
+				throw new IOException("No external network interface card detected");
+			}
+			this.socket = new java.net.ServerSocket(this.port, 0,iNetAddress);
 			System.out.println("Server has started on port: " + this.socket.getLocalPort());
 			System.out.println("Waiting for clients...");
 			this.socket.setSoTimeout(1000);
@@ -71,6 +96,7 @@ public class ServerSocket extends BaseSocket {
 			this.socket.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			System.out.println(e.getLocalizedMessage());
 			e.printStackTrace();
 		}		
 	}

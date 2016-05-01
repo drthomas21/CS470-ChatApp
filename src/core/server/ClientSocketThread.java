@@ -55,7 +55,11 @@ public class ClientSocketThread extends BaseSocket {
 	
 	@Override
 	public boolean isConnected() {
-		return this.socket.isConnected();
+		try {
+			return this.socket.isConnected() || !this.socket.getInetAddress().isReachable(300);
+		} catch (IOException e) {
+			return false;
+		}
 	}
 	
 	@Override

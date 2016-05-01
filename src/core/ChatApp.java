@@ -68,10 +68,7 @@ public class ChatApp {
 		String command = "";
 		int port = 8080;
 		if(args.length > 0) {
-			for(int i = 0; i < args.length; i++){
-				System.out.println("["+i+"]: " + args[i]);
-			}
-			//port = Integer.valueOf(args[0]);
+			port = Integer.valueOf(args[0]);
 		}
 		ChatApp.server = new core.server.ServerSocket(port);
 		ChatApp.server.start();
@@ -94,7 +91,16 @@ public class ChatApp {
 			System.out.print("Command: ");
 			command = reader.nextLine();
 			if(command.compareToIgnoreCase("help") == 0) {
-				//TODO: add help message
+				System.out.println(
+						"help: Display information about the available user interface options or command manual." + System.lineSeparator() +
+						"myip: Display the IP address of this process." + System.lineSeparator() +
+						"myport: Display the port on which this process is listening for incoming connections." + System.lineSeparator() +
+						"connect <destination> <port no>: This command establishes a new TCP connection to the specified <destination> at the specified < port no>." + System.lineSeparator() +
+						"list: Display a numbered list of all the connections this process is part of." + System.lineSeparator() +
+						"terminate <connection id>: This command will terminate the connection listed under the specified number when LIST is used to display all connections." + System.lineSeparator() +
+						"send <connection id> <message>: This will send the <message> to the host on the connection that is designated by the <connection id>." + System.lineSeparator() +
+						"exit: Close all connections and terminate this process."
+				);
 			} else if(command.compareToIgnoreCase("myip") == 0) {
 				System.out.println(ChatApp.server.getAddress());
 			} else if(command.compareToIgnoreCase("myport") == 0) {

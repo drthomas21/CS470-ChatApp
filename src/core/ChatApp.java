@@ -24,12 +24,20 @@ public class ChatApp {
 		}		
 	}
 	protected static List<BaseSocket> getConnections() {
+		server.isConnected();
 		List<BaseSocket> sockets = new ArrayList<>();
 		for(BaseSocket socket : connections) {
-			sockets.add(socket);
+			if(socket.isConnected()) {
+				sockets.add(socket);
+			} else {
+				connections.remove(socket);
+			}
 		}
 		for(BaseSocket socket : server.getClients()){
-			sockets.add(socket);
+			if(socket.isConnected()) {
+				sockets.add(socket);
+			}
+			
 		}
 		
 		return sockets;

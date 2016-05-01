@@ -121,11 +121,7 @@ public class ClientSocket extends BaseSocket {
 
 	@Override
 	public boolean isConnected() {
-		try {
-			return this.socket.isConnected() || this.socket.getInetAddress().isReachable(300);
-		} catch (IOException e) {
-			return false;
-		}
+		return this.socket.isConnected();
 	}
 
 	@Override

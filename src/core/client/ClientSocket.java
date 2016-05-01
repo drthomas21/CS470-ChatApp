@@ -46,7 +46,7 @@ public class ClientSocket extends BaseSocket {
 				while(socket.getInputStream().available() > 0 && reader.hasNext()) {
 					timestamp = System.currentTimeMillis();
 					String message = reader.nextLine();
-					if(message.compareTo("0") != 0) {
+					if(message.compareTo("1") != 0) {
 						System.out.println("Message received from " + this.hostAddress+System.lineSeparator()+"Sender's Port: "+this.hostPort + System.lineSeparator()+"Message: \"" + message + "\"");
 					}
 				}
@@ -54,30 +54,44 @@ public class ClientSocket extends BaseSocket {
 			} catch (IOException e) {
 				if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0) {
 					e.printStackTrace();
-				}				
+				} else {
+					this.stopThread();
+					break;
+				}
 			}			
 
 			//Write to socket output
-			while(messageBuffer.size() > 0) {
+			if(messageBuffer.size() > 0) {
+				while(messageBuffer.size() > 0) {
+					try {
+						this.socket.getOutputStream().write((messageBuffer.pop()+System.lineSeparator()).getBytes());
+						this.socket.getOutputStream().flush();
+					} catch (IOException e) {
+						if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0 || e.getLocalizedMessage().compareToIgnoreCase("Connection reset") != 0) {
+							e.printStackTrace();
+						} else {
+							this.stopThread();
+							break;
+						}
+					}
+				}
+			} else {
+				//Send heartbeat
 				try {
-					this.socket.getOutputStream().write(messageBuffer.pop().getBytes());
+					this.socket.getOutputStream().write(("1"+System.lineSeparator()).getBytes());
 					this.socket.getOutputStream().flush();
 				} catch (IOException e) {
-					if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0) {
+					if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0 || e.getLocalizedMessage().compareToIgnoreCase("Connection reset") != 0) {
 						e.printStackTrace();
+					} else {
+						this.stopThread();
+						break;
 					}
 				}
 			}
 			
-			//Send heartbeat
-			try {
-				this.socket.getOutputStream().write("0".getBytes());
-				this.socket.getOutputStream().flush();
-			} catch (IOException e) {
-				if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0) {
-					e.printStackTrace();
-				}
-			}
+			
+			
 			
 			try {
 				Thread.sleep(100);

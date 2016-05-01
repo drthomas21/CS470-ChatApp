@@ -55,9 +55,11 @@ public class ClientSocket extends BaseSocket {
 				if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0) {
 					e.printStackTrace();
 				} else {
-					this.stopThread();
-					break;
+					System.out.println("Socket closed");
 				}
+
+				this.stopThread();
+				break;
 			}			
 
 			//Write to socket output
@@ -67,12 +69,14 @@ public class ClientSocket extends BaseSocket {
 						this.socket.getOutputStream().write((messageBuffer.pop()+System.lineSeparator()).getBytes());
 						this.socket.getOutputStream().flush();
 					} catch (IOException e) {
-						if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0 || e.getLocalizedMessage().compareToIgnoreCase("Connection reset") != 0) {
+						if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0 && e.getLocalizedMessage().compareToIgnoreCase("Connection reset") != 0) {
 							e.printStackTrace();
 						} else {
-							this.stopThread();
-							break;
+							System.out.println("Socket closed");
 						}
+						
+						this.stopThread();
+						break;
 					}
 				}
 			} else {
@@ -81,24 +85,23 @@ public class ClientSocket extends BaseSocket {
 					this.socket.getOutputStream().write(("1"+System.lineSeparator()).getBytes());
 					this.socket.getOutputStream().flush();
 				} catch (IOException e) {
-					if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0 || e.getLocalizedMessage().compareToIgnoreCase("Connection reset") != 0) {
+					if(e.getLocalizedMessage().compareToIgnoreCase("Socket Closed") != 0 && e.getLocalizedMessage().compareToIgnoreCase("Connection reset") != 0) {
 						e.printStackTrace();
 					} else {
-						this.stopThread();
-						break;
+						System.out.println("Socket closed");
 					}
+					
+					this.stopThread();
+					break;
 				}
 			}
 			
-			
-			
-			
 			try {
-				Thread.sleep(100);
+				Thread.sleep(200);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}			
+			}
 		}
 		
 		this.run = false;

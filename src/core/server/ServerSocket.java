@@ -116,12 +116,13 @@ public class ServerSocket extends BaseSocket {
 			Iterator<ClientSocket> _itr1 = clients.iterator();
 			while(_itr1.hasNext()) {
 				BaseSocket client = _itr1.next();
-				if(client != null && client.isConnected()) {
+				if(client != null && !client.isConnected()) {
 					client.stopThread();
 					clients.remove(client);
 				}
 			}
 		} catch (ConcurrentModificationException e) {
+			e.printStackTrace();
 			return isConnected();
 		}		
 		

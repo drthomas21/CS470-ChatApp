@@ -52,7 +52,6 @@ public class ClientSocket extends BaseSocket {
 				}
 				//reader.close();
 			} catch (IOException e) {
-				System.out.println("Socket closed");
 				break;
 			}			
 
@@ -63,7 +62,6 @@ public class ClientSocket extends BaseSocket {
 						this.socket.getOutputStream().write((messageBuffer.pop()+System.lineSeparator()).getBytes());
 						this.socket.getOutputStream().flush();
 					} catch (IOException e) {
-						System.out.println("Socket closed");
 						break;
 					}
 				}
@@ -73,7 +71,6 @@ public class ClientSocket extends BaseSocket {
 					this.socket.getOutputStream().write(("1"+System.lineSeparator()).getBytes());
 					this.socket.getOutputStream().flush();
 				} catch (IOException e) {
-					System.out.println("Socket closed");
 					break;
 				}
 			}

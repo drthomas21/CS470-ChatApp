@@ -37,15 +37,17 @@ public class ChatApp {
 					sockets.add(socket);
 				}
 			}
-			Iterator<BaseSocket> _itr2 = server.getClients().iterator();
-			while(_itr2.hasNext()) {
-				BaseSocket socket = _itr2.next();
-				if(socket != null && socket.isConnected()) {
-					sockets.add(socket);
-				}
-			}
 		} catch(ConcurrentModificationException e) {
+			e.printStackTrace();
 			return getConnections();
+		}
+		
+		Iterator<BaseSocket> _itr2 = server.getClients().iterator();
+		while(_itr2.hasNext()) {
+			BaseSocket socket = _itr2.next();
+			if(socket != null && socket.isConnected()) {
+				sockets.add(socket);
+			}
 		}
 		
 		return sockets;

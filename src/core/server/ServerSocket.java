@@ -6,6 +6,7 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -111,14 +112,18 @@ public class ServerSocket extends BaseSocket {
 	
 	@Override
 	public boolean isConnected() {
-		Iterator<ClientSocket> _itr1 = clients.iterator();
-		while(_itr1.hasNext()) {
-			BaseSocket client = _itr1.next();
-			if(client != null && client.isConnected()) {
-				client.stopThread();
-				clients.remove(client);
+		try {
+			Iterator<ClientSocket> _itr1 = clients.iterator();
+			while(_itr1.hasNext()) {
+				BaseSocket client = _itr1.next();
+				if(client != null && client.isConnected()) {
+					client.stopThread();
+					clients.remove(client);
+				}
 			}
-		}
+		} catch (ConcurrentModificationException e) {
+			return isConnected();
+		}		
 		
 		return this.run && this.socket != null && !this.socket.isClosed();
 	}

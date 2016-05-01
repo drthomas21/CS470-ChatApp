@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
@@ -28,20 +29,24 @@ public class ChatApp {
 	protected static List<BaseSocket> getConnections() {
 		server.isConnected();
 		List<BaseSocket> sockets = new ArrayList<>();
-		Iterator<ClientSocket> _itr1 = connections.iterator();
-		while(_itr1.hasNext()) {
-			BaseSocket socket = _itr1.next();
-			if(socket != null && socket.isConnected()) {
-				sockets.add(socket);
+		try {
+			Iterator<ClientSocket> _itr1 = connections.iterator();
+			while(_itr1.hasNext()) {
+				BaseSocket socket = _itr1.next();
+				if(socket != null && socket.isConnected()) {
+					sockets.add(socket);
+				}
 			}
+			Iterator<BaseSocket> _itr2 = server.getClients().iterator();
+			while(_itr2.hasNext()) {
+				BaseSocket socket = _itr2.next();
+				if(socket != null && socket.isConnected()) {
+					sockets.add(socket);
+				}
+			}
+		} catch(ConcurrentModificationException e) {
+			return getConnections();
 		}
-		Iterator<BaseSocket> _itr2 = server.getClients().iterator();
-		while(_itr2.hasNext()) {
-			BaseSocket socket = _itr2.next();
-			if(socket != null && socket.isConnected()) {
-				sockets.add(socket);
-			}
-		}		
 		
 		return sockets;
 	}

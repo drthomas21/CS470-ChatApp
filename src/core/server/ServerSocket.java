@@ -48,7 +48,7 @@ public class ServerSocket extends BaseSocket {
 		Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces();
 		while(nics.hasMoreElements()) {
 			ni = nics.nextElement();
-			if(iNetAddress == null) {
+			if(iNetAddress == null && (ni.getName().startsWith("wlan") || ni.getName().startsWith("eth"))) {
 				Enumeration<InetAddress> addresses = ni.getInetAddresses();
 				while(addresses.hasMoreElements()) {
 					iNetAddress = addresses.nextElement();

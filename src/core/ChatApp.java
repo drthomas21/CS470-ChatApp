@@ -35,6 +35,8 @@ public class ChatApp {
 				BaseSocket socket = _itr1.next();
 				if(socket != null && socket.isConnected()) {
 					sockets.add(socket);
+				} else {
+					_itr1.remove();
 				}
 			}
 		} catch(ConcurrentModificationException e) {

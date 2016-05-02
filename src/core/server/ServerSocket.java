@@ -118,7 +118,7 @@ public class ServerSocket extends BaseSocket {
 				BaseSocket client = _itr1.next();
 				if(client != null && !client.isConnected()) {
 					client.stopThread();
-					clients.remove(client);
+					_itr1.remove();
 				}
 			}
 		} catch (ConcurrentModificationException e) {

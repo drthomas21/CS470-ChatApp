@@ -194,11 +194,12 @@ public class ChatApp {
 		
 		System.out.println("Shutting down");
 		
-		for(BaseSocket socket : getConnections()) {
-			socket.stopThread();
-		}
-		
 		ChatApp.server.stopThread();
+		Iterator<ClientSocket> itr = connections.iterator();
+		while(itr.hasNext()) {
+			itr.next().stopThread();
+		}		
+		
 		reader.close();
 	}
 }

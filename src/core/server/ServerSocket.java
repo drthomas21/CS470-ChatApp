@@ -108,12 +108,19 @@ public class ServerSocket extends BaseSocket {
 	
 	@Override
 	protected void closeSocket() throws IOException {
-		//Do Nothing - must close socket by stopping thread
+		Iterator<ClientSocket> itr = this.clients.iterator();
+		while(itr.hasNext()) {
+			itr.next().stopThread();
+		}
+		this.socket.close();
 	}
 	
 	@Override
 	public void sendMessage(String message) {
-		//Do Nothing - must send message by using client thread
+		Iterator<ClientSocket> itr = this.clients.iterator();
+		while(itr.hasNext()) {
+			itr.next().sendMessage(message);
+		}
 	}
 	
 	public void setNetworkInterface(String name) throws SocketException {

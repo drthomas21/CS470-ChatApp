@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
@@ -29,27 +28,19 @@ public class ChatApp {
 	protected static List<BaseSocket> getConnections() {
 		server.isConnected();
 		List<BaseSocket> sockets = new ArrayList<>();
-		try {
-			Iterator<ClientSocket> _itr1 = connections.iterator();
-			while(_itr1.hasNext()) {
-				BaseSocket socket = _itr1.next();
-				if(socket != null && socket.isConnected()) {
-					sockets.add(socket);
-				} else {
-					_itr1.remove();
-				}
-			}
-		} catch(ConcurrentModificationException e) {
-			e.printStackTrace();
-			return getConnections();
-		}
-		
-		Iterator<BaseSocket> _itr2 = server.getClients().iterator();
-		while(_itr2.hasNext()) {
-			BaseSocket socket = _itr2.next();
+		Iterator<ClientSocket> _itr1 = connections.iterator();
+		while(_itr1.hasNext()) {
+			BaseSocket socket = _itr1.next();
 			if(socket != null && socket.isConnected()) {
 				sockets.add(socket);
+			} else {
+				_itr1.remove();
 			}
+		}
+		
+		Iterator<ClientSocket> _itr2 = server.getClients().iterator();
+		while(_itr2.hasNext()) {
+			sockets.add(_itr2.next());
 		}
 		
 		return sockets;
@@ -92,20 +83,34 @@ public class ChatApp {
 		String command = "", nic = "",ipaddress = "";
 		int port = 8080;
 		
-		if(args.length > 0) {
+		if(args.length == 1) {
 			port = Integer.valueOf(args[0]);
-		}
-		if(args.length > 2) {
-			nic = args[1];
-			ipaddress = args[2];
+		} else if(args.length > 1) {
+			for(String arg : args) {
+				if(arg.startsWith("--port=")) {
+					port = Integer.valueOf(arg.replace("--port=", ""));
+				} else if(arg.startsWith("--interface=")) {
+					nic = arg.replace("--interface=", "");
+				} else if (arg.startsWith("--address=")) {
+					ipaddress = arg.replace("--address=", "");
+				}
+			}
 		}
 		
 		ChatApp.server = new core.server.ServerSocket(port);
 		if(!nic.isEmpty()) {
 			try {
-				ChatApp.server.setNetworkInterface(nic,ipaddress);
+				ChatApp.server.setNetworkInterface(nic);
 			} catch (SocketException e1) {
-				System.out.println("Network Interface ["+nic+"] does not exists");
+				System.out.println(e1.getLocalizedMessage());
+			}
+		}
+		
+		if(!ipaddress.isEmpty()){
+			try {
+				ChatApp.server.setAddress(ipaddress);
+			} catch (SocketException e1) {
+				System.out.println(e1.getLocalizedMessage());
 			}
 		}
 		ChatApp.server.start();

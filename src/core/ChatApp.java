@@ -86,13 +86,13 @@ public class ChatApp {
 		if(args.length == 1) {
 			port = Integer.valueOf(args[0]);
 		} else if(args.length > 1) {
-			for(String arg : args) {
-				if(arg.startsWith("--port=")) {
-					port = Integer.valueOf(arg.replace("--port=", ""));
-				} else if(arg.startsWith("--interface=")) {
-					nic = arg.replace("--interface=", "");
-				} else if (arg.startsWith("--address=")) {
-					ipaddress = arg.replace("--address=", "");
+			for(int i = 0; i < args.length-1;i++) {
+				if(args[i].startsWith("--port")) {
+					port = Integer.valueOf(args[i+1]);
+				} else if(args[i].startsWith("--interface")) {
+					nic = args[i+1];
+				} else if (args[i].startsWith("--address")) {
+					ipaddress = args[i+1];
 				}
 			}
 		}

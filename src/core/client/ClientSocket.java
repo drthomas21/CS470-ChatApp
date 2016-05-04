@@ -46,9 +46,9 @@ public class ClientSocket extends BaseSocket {
 			try {
 				while(socket.getInputStream().available() > 0 && reader.hasNext()) {
 					timestamp = System.currentTimeMillis();
-					String message = reader.nextLine().replaceFirst(MESSAGE_PREFIX, "");
+					String message = reader.nextLine();
 					if(message.compareTo("1") != 0) {
-						System.out.println("Message received from " + this.hostAddress+System.lineSeparator()+"Sender's Port: "+this.hostPort + System.lineSeparator()+"Message: \"" + message + "\"");
+						System.out.println("Message received from " + this.hostAddress+System.lineSeparator()+"Sender's Port: "+this.hostPort + System.lineSeparator()+"Message: \"" + message.replaceFirst(MESSAGE_PREFIX, "") + "\"");
 					}
 				}
 				//reader.close();

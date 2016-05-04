@@ -9,6 +9,7 @@ import core.BaseSocket;
 import data.model.MessageBufferModel;
 
 public class ClientSocket extends BaseSocket {
+	public static final String MESSAGE_PREFIX = "msg:";
 	private String hostAddress;
 	private int hostPort;
 	private java.net.Socket socket;
@@ -45,7 +46,7 @@ public class ClientSocket extends BaseSocket {
 			try {
 				while(socket.getInputStream().available() > 0 && reader.hasNext()) {
 					timestamp = System.currentTimeMillis();
-					String message = reader.nextLine();
+					String message = reader.nextLine().replaceFirst(MESSAGE_PREFIX, "");
 					if(message.compareTo("1") != 0) {
 						System.out.println("Message received from " + this.hostAddress+System.lineSeparator()+"Sender's Port: "+this.hostPort + System.lineSeparator()+"Message: \"" + message + "\"");
 					}
@@ -59,7 +60,7 @@ public class ClientSocket extends BaseSocket {
 			if(messageBuffer.size() > 0) {
 				while(messageBuffer.size() > 0) {
 					try {
-						this.socket.getOutputStream().write((messageBuffer.pop()+System.lineSeparator()).getBytes());
+						this.socket.getOutputStream().write((MESSAGE_PREFIX + messageBuffer.pop()+System.lineSeparator()).getBytes());
 						this.socket.getOutputStream().flush();
 					} catch (IOException e) {
 						break;

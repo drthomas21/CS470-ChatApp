@@ -81,14 +81,13 @@ public class ServerSocket extends BaseSocket {
 				} catch(java.net.SocketTimeoutException e) {
 					//Do nothing, socket waits for 1 second for any handshakes
 				} catch (IOException e) {
-					System.out.println("Client failed to establish a connection");
+					System.out.println(e.getLocalizedMessage());
 				}
 			}			
 			this.socket.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.out.println(e.getLocalizedMessage());
-			e.printStackTrace();
 		}		
 	}
 	

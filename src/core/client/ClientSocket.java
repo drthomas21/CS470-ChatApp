@@ -10,6 +10,7 @@ import data.model.MessageBufferModel;
 
 public class ClientSocket extends BaseSocket {
 	public static final String MESSAGE_PREFIX = "msg:";
+	public static final String HEARTBEAT = "1";
 	private String hostAddress;
 	private int hostPort;
 	private java.net.Socket socket;
@@ -47,12 +48,13 @@ public class ClientSocket extends BaseSocket {
 				while(socket.getInputStream().available() > 0 && reader.hasNext()) {
 					timestamp = System.currentTimeMillis();
 					String message = reader.nextLine();
-					if(message.compareTo("1") != 0) {
+					if(message.compareTo(HEARTBEAT) != 0) {
 						System.out.println("Message received from " + this.hostAddress+System.lineSeparator()+"Sender's Port: "+this.hostPort + System.lineSeparator()+"Message: \"" + message.replaceFirst(MESSAGE_PREFIX, "") + "\"");
 					}
 				}
-				//reader.close();
 			} catch (IOException e) {
+				//If we cannot read from socket, then lets close the whole connection stream
+				this.stopThread();
 				break;
 			}			
 
@@ -63,34 +65,36 @@ public class ClientSocket extends BaseSocket {
 						this.socket.getOutputStream().write((MESSAGE_PREFIX + messageBuffer.pop()+System.lineSeparator()).getBytes());
 						this.socket.getOutputStream().flush();
 					} catch (IOException e) {
+						//If we cannot write to socket, then lets close the whole connection stream
+						this.stopThread();
 						break;
 					}
 				}
 			} else {
 				//Send heart beat
 				try {
-					this.socket.getOutputStream().write(("1"+System.lineSeparator()).getBytes());
+					this.socket.getOutputStream().write((HEARTBEAT+System.lineSeparator()).getBytes());
 					this.socket.getOutputStream().flush();
 				} catch (IOException e) {
+					//If we cannot write to socket, then lets close the whole connection stream
+					this.stopThread();
 					break;
 				}
 			}
 			
 			try {
-				Thread.sleep(200);
+				//Lets allow the CPU to rest
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//Do nothing
 			}
 		}
 		
-		this.run = false;
-		
 		try {
+			this.reader.close();
 			this.socket.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//Do nothing
 		}		
 	}
 

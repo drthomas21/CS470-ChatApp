@@ -111,7 +111,6 @@ public class ServerSocket extends BaseSocket {
 		while(itr.hasNext()) {
 			itr.next().stopThread();
 		}
-		this.socket.close();
 	}
 	
 	@Override

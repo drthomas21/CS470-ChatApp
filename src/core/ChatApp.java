@@ -78,11 +78,13 @@ public class ChatApp {
 	}
 	
 	public static void main(String args[]) {
+		//Setup some vars
 		connections = new ArrayList<>();
 		Scanner reader = new Scanner(System.in);
 		String command = "", nic = "",ipaddress = "";
 		int port = 8080;
 		
+		//Read args
 		if(args.length == 1) {
 			port = Integer.valueOf(args[0]);
 		} else if(args.length > 1) {
@@ -97,6 +99,7 @@ public class ChatApp {
 			}
 		}
 		
+		//Setup Server
 		ChatApp.server = new core.server.ServerSocket(port);
 		if(!nic.isEmpty()) {
 			try {
@@ -122,6 +125,7 @@ public class ChatApp {
 			e.printStackTrace();
 		}
 		
+		//Read commands
 		while(command.compareToIgnoreCase("exit") != 0) {			
 			System.out.print("Command: ");
 			command = reader.nextLine();
@@ -192,6 +196,7 @@ public class ChatApp {
 			}
 		}
 		
+		//Shut everything down
 		System.out.println("Shutting down");
 		
 		ChatApp.server.stopThread();

@@ -60,6 +60,7 @@ public class ClientSocket extends BaseSocket {
 				
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
+				e.printStackTrace();
 				//If we cannot read from socket, then lets close the whole connection stream
 				this.stopThread();
 				break;
@@ -74,6 +75,7 @@ public class ClientSocket extends BaseSocket {
 						this.socket.getOutputStream().flush();
 					} catch (IOException e) {
 						System.out.println(e.getMessage());
+						e.printStackTrace();
 						//If we cannot write to socket, then lets close the whole connection stream
 						this.stopThread();
 						break;
@@ -86,6 +88,7 @@ public class ClientSocket extends BaseSocket {
 					this.socket.getOutputStream().flush();
 				} catch (IOException e) {
 					System.out.println(e.getMessage());
+					e.printStackTrace();
 					//If we cannot write to socket, then lets close the whole connection stream
 					this.stopThread();
 					break;

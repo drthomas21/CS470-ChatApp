@@ -11,6 +11,7 @@ import data.model.MessageBufferModel;
 public class ClientSocket extends BaseSocket {
 	public static final String MESSAGE_PREFIX = "msg:";
 	public static final String HEARTBEAT = "1";
+	public static final int TIMEOUT = 3000;
 	private String hostAddress;
 	private int hostPort;
 	private java.net.Socket socket;
@@ -42,17 +43,23 @@ public class ClientSocket extends BaseSocket {
 	@Override
 	public void run() {
 		timestamp = System.currentTimeMillis();
-		while(this.run && !this.socket.isClosed() && System.currentTimeMillis() - timestamp < 1000) {
+		while(this.run && !this.socket.isClosed() && System.currentTimeMillis() - timestamp < TIMEOUT) {
+			boolean didAction = false;
 			//Read socket input
 			try {
-				while(socket.getInputStream().available() > 0 && reader.hasNext()) {
-					timestamp = System.currentTimeMillis();
-					String message = reader.nextLine();
-					if(message.compareTo(HEARTBEAT) != 0) {
-						System.out.println("Message received from " + this.hostAddress+System.lineSeparator()+"Sender's Port: "+this.hostPort + System.lineSeparator()+"Message: \"" + message.replaceFirst(MESSAGE_PREFIX, "") + "\"");
+				if(socket.getInputStream().available() > 0) {
+					didAction = true;
+					while(reader.hasNext()) {						
+						timestamp = System.currentTimeMillis();
+						String message = reader.nextLine();
+						if(message.compareTo(HEARTBEAT) != 0) {
+							System.out.println("Message received from " + this.hostAddress+System.lineSeparator()+"Sender's Port: "+this.hostPort + System.lineSeparator()+"Message: \"" + message.replaceFirst(MESSAGE_PREFIX, "") + "\"");
+						}
 					}
 				}
+				
 			} catch (IOException e) {
+				System.out.println(e.getMessage());
 				//If we cannot read from socket, then lets close the whole connection stream
 				this.stopThread();
 				break;
@@ -60,11 +67,13 @@ public class ClientSocket extends BaseSocket {
 
 			//Write to socket output
 			if(messageBuffer.size() > 0) {
+				didAction = true;
 				while(messageBuffer.size() > 0) {
 					try {
 						this.socket.getOutputStream().write((MESSAGE_PREFIX + messageBuffer.pop()+System.lineSeparator()).getBytes());
 						this.socket.getOutputStream().flush();
 					} catch (IOException e) {
+						System.out.println(e.getMessage());
 						//If we cannot write to socket, then lets close the whole connection stream
 						this.stopThread();
 						break;
@@ -76,18 +85,21 @@ public class ClientSocket extends BaseSocket {
 					this.socket.getOutputStream().write((HEARTBEAT+System.lineSeparator()).getBytes());
 					this.socket.getOutputStream().flush();
 				} catch (IOException e) {
+					System.out.println(e.getMessage());
 					//If we cannot write to socket, then lets close the whole connection stream
 					this.stopThread();
 					break;
 				}
 			}
 			
-			try {
-				//Lets allow the CPU to rest
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				//Do nothing
-			}
+			if(!didAction) {
+				try {
+					//Lets allow the CPU to rest
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+					//Do nothing
+				}	
+			}			
 		}
 		
 		try {

@@ -47,17 +47,14 @@ public class ClientSocket extends BaseSocket {
 			boolean didAction = false;
 			//Read socket input
 			try {
-				if(socket.getInputStream().available() > 0) {
-					didAction = true;
-					while(reader.hasNext()) {						
-						timestamp = System.currentTimeMillis();
-						String message = reader.nextLine();
-						if(message.compareTo(HEARTBEAT) != 0) {
-							System.out.println("Message received from " + this.hostAddress+System.lineSeparator()+"Sender's Port: "+this.hostPort + System.lineSeparator()+"Message: \"" + message.replaceFirst(MESSAGE_PREFIX, "") + "\"");
-						}
+				while(socket.getInputStream().available() > 0 && reader.hasNext()) {
+					timestamp = System.currentTimeMillis();
+					String message = reader.nextLine();
+					if(message.compareTo(HEARTBEAT) != 0) {
+						didAction = true;							
+						System.out.println("Message received from " + this.hostAddress+System.lineSeparator()+"Sender's Port: "+this.hostPort + System.lineSeparator()+"Message: \"" + message.replaceFirst(MESSAGE_PREFIX, "") + "\"");
 					}
-				}
-				
+				}				
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
 				e.printStackTrace();

@@ -95,7 +95,7 @@ public class ClientSocket extends BaseSocket {
 			if(!didAction) {
 				try {
 					//Lets allow the CPU to rest
-					Thread.sleep(1);
+					Thread.sleep(200);
 				} catch (InterruptedException e) {
 					//Do nothing
 				}	
